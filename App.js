@@ -1,31 +1,18 @@
 import { StatusBar } from 'expo-status-bar';
 import { Button, StyleSheet, Text, View } from 'react-native';
 import { Audio } from 'expo-av';
+import { Player, Recorder, MediaStates } from '@react-native-community/audio-toolkit';
 // import Tts from 'react-native-tts';
 // import SoundPlayer from 'react-native-sound-player'
 
 
 export default function App() {
-
-  const playSound = React.useCallback(async () => {
-    const { sound } = await Audio.Sound.createAsync(notificationSrc);
-    setSound(sound);
-    await sound.playAsync();
-  }, []);
-
-
-
-  // let audio = new Audio("/assets/test.mp3")
-
-  // const start = () => {
-  //   // audio.play()
-  // }
+  
   return (
     <View style={styles.container}>
-      <Text>Hello word</Text>
       <Button
         onPress={onClick}
-        title="Learn More"
+        title="Play audio"
         color="#841584"
         accessibilityLabel="Learn more about this purple button"
     />
@@ -37,9 +24,37 @@ export default function App() {
   );
 }
 
+const soundObject = new Audio.Sound()
+
+
 function onClick(){
-  alert("yo")
+  playAudio(require('./assets/spook3.mp3'))
 }
+
+async function playAudio(filepath){
+  try {
+    let source = filepath
+    await soundObject.loadAsync(source)
+    await soundObject
+      .playAsync()
+      .then(async playbackStatus => {
+        // alert('playback complete')
+        setTimeout(() => {
+          soundObject.unloadAsync()
+          // soundObject.unloadAsync()
+        }, playbackStatus.playableDurationMillis)
+      })
+      .catch(error => {
+        alert(error)
+        console.log(error)
+      })
+  } catch (error) {
+    alert(error)
+    console.log(error)
+  }
+}
+
+
 
 const styles = StyleSheet.create({
   container: {
