@@ -1,6 +1,7 @@
 import {StatusBar} from 'expo-status-bar';
 import {Button, StyleSheet, View} from 'react-native';
-import {Audio} from 'expo-av';
+// import {queue, stop ,start} from './AudioHandler.js'
+import {queue, start, stop} from './AudioHandler.js'
 
 
 export default function App() {
@@ -20,9 +21,6 @@ const NOTE_RANGE = 12
 // const NOTE_LIBRARY_RANGE = [21, 96]
 const NOTE_LIBRARY_RANGE = [0, 75]
 
-
-let soundObjectArr = []
-let audioQueue = []
 let MIDI_NOTE = [
     require('./assets/notes/A0.mp3'),
     require('./assets/notes/Bb0.mp3'),
@@ -103,39 +101,30 @@ let MIDI_NOTE = [
 ]
 
 let INTERVAL = []
-let totalAudioLoops = 0
 
 let isPaused = true
 
 function onClick() {
+    // queue(MIDI_NOTE[0])
+    // start()
     if(isPaused) {
         addNotesToQueue()
-        audioStart(addNotesToQueue)
+        start(addNotesToQueue)
     }
     else {
-        audioStop()
+        stop()
     }
     isPaused ^=true
 }
 
-function queueAudio(audio, delay = 0) {
-    if (audio instanceof Array) {
-        audio.push(delay)
-        audioQueue.push(audio)
-    } else {
-        var array = [audio, delay]
-        audioQueue.push(array)
-    }
-}
-
 function addNotesToQueue() {
-    var initialNote = randomInt(
+    let initialNote = randomInt(
         NOTE_LIBRARY_RANGE[0] + (NOTE_RANGE*2),
         NOTE_LIBRARY_RANGE[1] - (NOTE_RANGE*2)
     )
-    var secondNote = initialNote + randomInt(-1 * NOTE_RANGE, NOTE_RANGE)
-    queueAudio(MIDI_NOTE[initialNote])
-    queueAudio(MIDI_NOTE[secondNote])
+    let secondNote = initialNote + randomInt(-1 * NOTE_RANGE, NOTE_RANGE)
+    queue(MIDI_NOTE[initialNote])
+    queue(MIDI_NOTE[secondNote])
     console.log(Math.abs(secondNote - initialNote))
 
     // queueAudio(INTERVAL[Math.abs(secondNote - initialNote)])
@@ -154,63 +143,6 @@ function intToNoteName(pitch) {
     var note = noteNames[pitch % 12]
     var octave = Math.floor((pitch + 9) / 12)
     return note + octave.toString()
-}
-
-function audioStop() {
-    soundObjectArr.forEach(element => {
-        element.unloadAsync()
-    })
-    soundObjectArr = []
-    audioQueue = []
-    totalAudioLoops++
-}
-
-function audioStart(cb = null){
-    totalAudioLoops++
-    audioStartHelper(cb,totalAudioLoops)
-}
-
-function audioStartHelper(cb,curentLoopNumber = 0) {
-    if(curentLoopNumber != totalAudioLoops) return;
-    soundObjectArr.forEach(element => {
-        element.unloadAsync()
-    })
-    soundObjectArr = []
-    try {
-        if ((audioQueue.length < 0)||(audioQueue[0].length < 0)) return
-
-    } catch {
-        return
-    }
-    for (let i = audioQueue[0].length - 2; i > 0; i--) {
-        soundObjectArr[i] = new Audio.Sound()
-        playAudio(soundObjectArr[i], audioQueue[0][i],curentLoopNumber)
-    }
-    soundObjectArr[0] = new Audio.Sound()
-    playAudio(soundObjectArr[0], audioQueue[0][0],curentLoopNumber, audioQueue[0][audioQueue[0].length-1], true,cb)
-    audioQueue.shift()
-}
-
-async function playAudio(audioObject, filepath, core, timeShift = 0, isFinal = false,cb) {
-    try {
-        let source = filepath
-        await audioObject.loadAsync(source)
-        await audioObject.playAsync()
-            .then(async playbackStatus => {
-                setTimeout(() => {
-                    audioObject.unloadAsync()
-                    if (isFinal) {
-                        if(cb != null) cb()
-                        audioStartHelper(cb,core)
-                    }
-                }, playbackStatus.durationMillis+(timeShift*1000))
-            })
-            .catch(error => {
-                console.log(error)
-            })
-    } catch (error) {
-        console.log(error)
-    }
 }
 
 const styles = StyleSheet.create({
