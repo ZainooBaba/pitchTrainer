@@ -1,4 +1,4 @@
-import {Audio} from "expo-av";
+import {Audio, InterruptionModeAndroid, InterruptionModeIOS} from "expo-av";
 
 let soundObjectArr = []
 let audioQueue = []
@@ -29,7 +29,6 @@ export function start(cb = null){
 }
 
 function audioStartHelper(cb,curentLoopNumber = 0) {
-    console.log("trying")
     if(curentLoopNumber != totalAudioLoops) return;
     soundObjectArr.forEach(element => {
         element.unloadAsync()
@@ -53,6 +52,15 @@ function audioStartHelper(cb,curentLoopNumber = 0) {
 async function playAudio(audioObject, filepath, core, timeShift = 0, isFinal = false,cb) {
     try {
         let source = filepath
+        await Audio.setAudioModeAsync({
+            allowsRecordingIOS: false,
+            staysActiveInBackground: true,
+            interruptionModeIOS: InterruptionModeIOS.DuckOthers,
+            playsInSilentModeIOS: true,
+            shouldDuckAndroid: true,
+            interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
+            playThroughEarpieceAndroid: false
+        });
         await audioObject.loadAsync(source)
         await audioObject.playAsync()
             .then(async playbackStatus => {

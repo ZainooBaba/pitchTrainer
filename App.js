@@ -1,25 +1,21 @@
 import {StatusBar} from 'expo-status-bar';
-import {Button, StyleSheet, View} from 'react-native';
-// import {queue, stop ,start} from './AudioHandler.js'
+import {Pressable, StyleSheet, Text, View} from 'react-native';
 import {queue, start, stop} from './AudioHandler.js'
 
 
 export default function App() {
 
     return (<View style={styles.container}>
-            <Button
-                onPress={onClick}
-                title="Play audio"
-                color="#541584"
-                accessibilityLabel="Learn more about this purple button"
-            />
+            <Pressable style={styles.playButton} onPress={onClick} onPressIn={onClick} onPressOut={onClick}>
+            <Text style={styles.playButtonText}> ▶</Text>
+        </Pressable>
             <StatusBar style="auto"/>
         </View>);
 }
 
-const NOTE_RANGE = 12
-// const NOTE_LIBRARY_RANGE = [21, 96]
 const NOTE_LIBRARY_RANGE = [0, 75]
+const NOTE_RANGE = 12
+const WAIT_TIMES = [-1.5,-1,0.5]
 
 let MIDI_NOTE = [
     require('./assets/notes/A0.mp3'),
@@ -99,14 +95,26 @@ let MIDI_NOTE = [
     require('./assets/notes/B6.mp3'),
     require('./assets/notes/C7.mp3'),
 ]
-
-let INTERVAL = []
+let INTERVAL = [
+    require('./assets/Intervals/Interval_1.mp3'),
+    require('./assets/Intervals/Interval_2.mp3'),
+    require('./assets/Intervals/Interval_3.mp3'),
+    require('./assets/Intervals/Interval_4.mp3'),
+    require('./assets/Intervals/Interval_5.mp3'),
+    require('./assets/Intervals/Interval_6.mp3'),
+    require('./assets/Intervals/Interval_7.mp3'),
+    require('./assets/Intervals/Interval_8.mp3'),
+    require('./assets/Intervals/Interval_9.mp3'),
+    require('./assets/Intervals/Interval_10.mp3'),
+    require('./assets/Intervals/Interval_11.mp3'),
+    require('./assets/Intervals/Interval_12.mp3'),
+    require('./assets/Intervals/Interval_13.mp3'),
+    require('./assets/Intervals/Interval_15.mp3'),
+]
 
 let isPaused = true
 
 function onClick() {
-    // queue(MIDI_NOTE[0])
-    // start()
     if(isPaused) {
         addNotesToQueue()
         start(addNotesToQueue)
@@ -123,11 +131,9 @@ function addNotesToQueue() {
         NOTE_LIBRARY_RANGE[1] - (NOTE_RANGE*2)
     )
     let secondNote = initialNote + randomInt(-1 * NOTE_RANGE, NOTE_RANGE)
-    queue(MIDI_NOTE[initialNote])
-    queue(MIDI_NOTE[secondNote])
-    console.log(Math.abs(secondNote - initialNote))
-
-    // queueAudio(INTERVAL[Math.abs(secondNote - initialNote)])
+    queue(MIDI_NOTE[initialNote],WAIT_TIMES[0])
+    queue(MIDI_NOTE[secondNote],WAIT_TIMES[1])
+    queue(INTERVAL[Math.abs(secondNote - initialNote)],WAIT_TIMES[2])
 }
 
 function randomInt(min, max) { // min and max included
@@ -147,6 +153,22 @@ function intToNoteName(pitch) {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center',
+        flex: 1, backgroundColor: '#111', alignItems: 'center', justifyContent: 'center',
     },
+    playButton: {
+        backgroundColor: 'red',
+        height: 270,
+        width: 270,
+        borderRadius: 125,
+        borderColor:'white',
+        borderWidth: 10,
+        textAlign: 'center',
+        textAlignVertical:'lower',
+    },
+    playButtonText:{
+        textAlign:'center',
+        textAlignVertical:'lower',
+        fontSize:200,
+        color: 'white'
+    }
 });
